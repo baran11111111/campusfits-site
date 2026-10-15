@@ -95,7 +95,7 @@ footer nav a {{ color: var(--muted); text-decoration: none; }}
 <main><div class="in">
 {body}
 </div></main>
-<footer><div class="in"><span>© 2026 CampusFits · Aynı an, aynı kampüs, aynı kafa.</span><nav aria-label="Alt bağlantılar">{nav}</nav></div></footer>
+<footer><div class="in"><span>© 2026 CampusFits · Baran Uygun tarafından geliştirildi.</span><nav aria-label="Alt bağlantılar">{nav}</nav></div></footer>
 </body>
 </html>
 '''
