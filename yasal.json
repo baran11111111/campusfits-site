@@ -6,7 +6,7 @@
     "h": "Kimler kullanabilir",
     "p": [
      "campusfits 18 yaşını doldurmuş üniversite öğrencileri içindir. 18 yaşını doldurmamış kişiler hesap açamaz.",
-     "Öğrenci kimliği onaylanan hesaplar \"doğrulanmış öğrenci\" rozeti alır. Başkası adına hesap açmak ve sahte bilgi vermek yasaktır."
+     "Okul mailini doğrulayan hesaplar \"doğrulanmış öğrenci\" rozeti alır. Başkası adına hesap açmak ve sahte bilgi vermek yasaktır."
     ]
    },
    {
@@ -68,8 +68,8 @@
     "h": "İşlenen veriler",
     "p": [
      "Kimlik: ad soyad, doğum yılı.",
-     "İletişim: mail adresi.",
-     "Öğrenim: üniversite, kampüs, bölüm, giriş yılı. Doğrulama için gönderilirse öğrenci kimliği fotoğrafı; sadece ekip inceler, inceleme bitince silinir.",
+     "İletişim: mail adresi; doğrulama için eklersen okul mail adresin (yalnızca sen görürsün).",
+     "Öğrenim: üniversite, kampüs, bölüm, giriş yılı.",
      "Profil: profil fotoğrafı, memleket, ilgi alanları.",
      "Konum: sadece açık rızanla, paylaşımı açtığın süre boyunca.",
      "İçerik ve mesajlar: mesajlar, planlar, sorular, cevaplar, paylaştığın fotoğraflar.",
@@ -105,7 +105,7 @@
    {
     "h": "Aktarım ve yurt dışı",
     "p": [
-     "Veriler, hizmeti barındıran altyapı, veritabanı, mail ve bildirim sağlayıcılarına aktarılır: Supabase (veritabanı, dosya depolama ve giriş), Resend (giriş kodu maili), Expo, Apple ve Google (telefon bildirimleri).",
+     "Veriler, hizmeti barındıran altyapı, veritabanı, mail ve bildirim sağlayıcılarına aktarılır: Supabase (veritabanı, dosya depolama ve giriş), Resend (giriş ve okul maili doğrulama kodları), Expo, Apple ve Google (telefon bildirimleri).",
      "Bu sağlayıcıların sunucuları yurt dışında bulunabilir. Yeterlilik kararı olmayan ülkelere aktarımda KVKK m.9 kapsamında Kurul'un ilan ettiği standart sözleşmeler kullanılır ve sözleşme Kurul'a süresi içinde bildirilir.",
      "Yasal zorunluluk halinde yetkili kamu kurum ve kuruluşlarına aktarılabilir."
     ]
