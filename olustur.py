@@ -1,7 +1,7 @@
 # campusfits.com sayfalarını üretir: index.html (sablon.html'den) ve yasal sayfalar (yasal.json'dan).
 # yasal.json uygulamadaki src/app/yasal/[doc].tsx metinlerinden çıkarılır; uygulama ile site aynı metni gösterir.
 # Çalıştır: python3 olustur.py
-import html, json
+import base64, hashlib, html, json, os
 
 ROOT = __file__.rsplit('/', 1)[0]
 read = lambda p: open(f'{ROOT}/{p}', encoding='utf-8').read()
@@ -138,9 +138,9 @@ destek = f'''<section class="doc">
 <p>Uygulamanın içinden de yazabilirsin: Ayarlar → Destek.</p>
 <h2 id="hesap-silme">Hesabını silmek</h2>
 <ol class="steps">
-<li>Uygulamada sağ alttaki profil fotoğrafına, ardından Ayarlar'a dokun.</li>
+<li>Uygulamada sol üstteki profil fotoğrafına, ardından sağ üstteki Ayarlar'a dokun.</li>
 <li>En alttaki "Hesabımı sil"e dokun ve onayla.</li>
-<li>Profilin, mesajların, anlıkların, planların ve fotoğrafların silinir. Kanunen saklamamız gereken kayıtlar (ör. şikâyet kayıtları) dışında hiçbir veri kalmaz.</li>
+<li>Profilin, mesajların, anlıkların, planların ve fotoğrafların silinir. Güvenlik için tutulan şikâyet kayıtları ve kanunen saklanması gereken bağlantı kayıtları dışında hiçbir veri kalmaz.</li>
 </ol>
 <p>Uygulamaya giremiyorsan kayıtlı mail adresinden <span class="mail">{SUPPORT}</span> adresine "Hesabımı silin" diye yaz; hesabını 30 gün içinde sileriz.</p>
 <h2>Şikâyet ve güvenlik</h2>
@@ -149,4 +149,64 @@ destek = f'''<section class="doc">
 <p>Doğrulama, konum ve anlıklarla ilgili cevaplar <a href="index.html#sss">ana sayfadaki sorular</a> bölümünde.</p>
 </section>'''
 page('destek.html', 'Destek', 'CampusFits destek, iletişim ve hesap silme.', destek)
+# ───── Davet sayfası (https://campusfits.com/davet) ─────
+# Uygulamadaki her paylaşım bu adresi taşır (?plan=<kimlik> ya da ?kisi=<kullanıcı adı>). Uygulama yüklüyse iOS bu linki
+# doğrudan uygulamada açar (universal link, .well-known/apple-app-site-association); değilse bu sayfa görünür.
+# Sitedeki tek betik bu: linkteki parametreyi doğrulayıp "uygulamada aç" bağlantısına ve başlığa yazar. CSP sadece
+# bu betiğin özetine (sha256) izin verir. Metin textContent ile yazılır; HTML olarak yorumlanmaz.
+APP_STORE_URL = ''  # App Store Connect'te uygulama açılınca: https://apps.apple.com/tr/app/campusfits/id<ID>
+DAVET_JS = ("(function(){var q=new URLSearchParams(location.search),p=q.get('plan')||'',k=q.get('kisi')||'',s=[];"
+            "if(/^[0-9a-z-]{1,64}$/i.test(p))s.push('plan='+encodeURIComponent(p));else p='';"
+            "if(/^[a-z0-9._]{1,40}$/i.test(k))s.push('kisi='+encodeURIComponent(k));else k='';"
+            "document.getElementById('ac').href='campusfits://davet'+(s.length?'?'+s.join('&'):'');"
+            "var b=document.getElementById('baslik'),a=document.getElementById('alt');"
+            "if(p){b.textContent='Bir plana davet edildin.';a.textContent='Uygulamayı indir, sonra bu linke tekrar dokun; plan doğrudan açılır.';}"
+            "else if(k){var n=k.split('.')[0];n=n.charAt(0).toLocaleUpperCase('tr')+n.slice(1);b.textContent=n+' seni kampüsüne çağırıyor.';}"
+            "})();")
+_h = base64.b64encode(hashlib.sha256(DAVET_JS.encode()).digest()).decode()
+DAVET_META = (f'<meta http-equiv="Content-Security-Policy" content="{CSP.replace(chr(39) + "none" + chr(39), chr(39) + "sha256-" + _h + chr(39), 1)}">\n'
+              '<meta name="referrer" content="strict-origin-when-cross-origin">\n'
+              '<meta property="og:type" content="website">\n'
+              '<meta property="og:site_name" content="CampusFits">\n'
+              '<meta property="og:title" content="Kampüsüne davetlisin · CampusFits">\n'
+              '<meta property="og:description" content="Sınıfın, planlar ve kampüsteki yeni insanlar tek uygulamada.">\n'
+              '<meta property="og:image" content="https://campusfits.com/img/davet-og.jpg">\n'
+              '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">\n'
+              '<meta property="og:url" content="https://campusfits.com/davet">\n'
+              '<meta name="twitter:card" content="summary_large_image">\n')
+magaza = (f'<a class="btn ana" href="{APP_STORE_URL}">App Store\'dan indir</a>' if APP_STORE_URL
+          else '<span class="btn ana pasif">App Store\'da çok yakında</span>')
+davet = f'''<style>
+.davet {{ max-width: 620px; margin: 0 auto; padding-block: 56px 24px; }}
+.davet h1 {{ font-family: var(--display); font-size: clamp(34px, 8vw, 54px); line-height: 1.05; letter-spacing: -0.02em; margin: 8px 0 16px; }}
+.davet .btns {{ display: flex; flex-direction: column; gap: 12px; margin: 28px 0 12px; }}
+.btn {{ display: block; text-align: center; padding: 17px 20px; border-radius: 999px; font-weight: 700; font-size: 17px; text-decoration: none;
+  border: 1px solid var(--hair); color: var(--ink); background: var(--card); }}
+.btn.ana {{ background: linear-gradient(135deg, #FF6A00, #FF0F7B); border: 0; color: #fff; }}
+.btn.pasif {{ opacity: 0.75; }}
+.davet .steps li {{ margin-bottom: 6px; }}
+</style>
+<section class="davet doc">
+<p class="eyebrow">Davet</p>
+<h1 id="baslik">Kampüsüne davetlisin.</h1>
+<p class="intro" id="alt">Arkadaşın seni CampusFits\'e çağırdı. Sınıfını, planları ve kampüsteki yeni insanları tek uygulamada gör.</p>
+<div class="btns">
+{magaza}
+<a class="btn" id="ac" href="campusfits://davet">Uygulaman varsa: uygulamada aç</a>
+</div>
+<p class="note">Android sürümü yakında Google Play\'de.</p>
+<h2>Nasıl başlarsın?</h2>
+<ol class="steps">
+<li>Uygulamayı indir, kendi mailinle kaydol.</li>
+<li>Üniversiteni, kampüsünü ve bölümünü seç; sınıfın kendiliğinden hazır olur.</li>
+<li>Okul mailini doğrula, mavi rozetin gelsin; planlara katıl.</li>
+</ol>
+</section>
+<script>{DAVET_JS}</script>'''
+write('davet.html', PAGE.format(security=DAVET_META, title='Davet', desc='Kampüsüne davetlisin: CampusFits ile sınıfın, planlar ve yeni insanlar tek uygulamada.', nav=FOOTER_LINKS, body=davet))
+
+# Universal link: iOS bu dosyayı okuyup campusfits.com/davet linklerini uygulamada açar (ekip XR5Y5B4A69, paket com.campusfits.app).
+os.makedirs(f'{ROOT}/.well-known', exist_ok=True)
+with open(f'{ROOT}/.well-known/apple-app-site-association', 'w', encoding='utf-8') as fh:
+    json.dump({'applinks': {'details': [{'appIDs': ['XR5Y5B4A69.com.campusfits.app'], 'components': [{'/': '/davet*', 'comment': 'Davet linkleri'}]}]}}, fh, indent=2)
 print('tamam')

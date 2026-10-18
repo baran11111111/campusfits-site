@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "XR5Y5B4A69.com.campusfits.app"
+        ],
+        "components": [
+          {
+            "/": "/davet*",
+            "comment": "Davet linkleri"
+          }
+        ]
+      }
+    ]
+  }
+}
