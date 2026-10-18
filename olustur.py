@@ -1,5 +1,5 @@
 # campusfits.com sayfalarını üretir: index.html (sablon.html'den) ve yasal sayfalar (yasal.json'dan).
-# yasal.json uygulamadaki src/app/yasal/[doc].tsx metinlerinden çıkarılır; uygulama ile site aynı metni gösterir.
+# Yasal metinlerin tek kaynağı uygulama reposundaki src/data/yasal.json; uygulama ile site aynı metni gösterir.
 # Çalıştır: python3 olustur.py
 import base64, hashlib, html, json, os
 
@@ -32,7 +32,7 @@ index = index.replace('<nav aria-label="Alt bağlantılar"><a href="gizlilik.htm
 write('index.html', index)
 
 # ───── Yasal sayfalar ─────
-docs = json.load(open(f'{ROOT}/yasal.json', encoding='utf-8'))
+docs = json.load(open(f'{ROOT}/../ogrenci-app/src/data/yasal.json', encoding='utf-8'))
 
 PAGE = '''<!doctype html>
 <html lang="tr">
