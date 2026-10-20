@@ -20,13 +20,33 @@ SECURITY_META = (f'<meta http-equiv="Content-Security-Policy" content="{CSP}">\n
 FOOTER_LINKS = ('<a href="gizlilik.html">Gizlilik</a><a href="kosullar.html">Kullanım koşulları</a>'
                 '<a href="cocuk-guvenligi.html">Çocuk güvenliği</a><a href="destek.html">Destek</a>')
 
+# ───── Mağaza ─────
+# Apple onayı gelince YAYINDA = True yapıp yeniden üret: ana sayfanın "Yakında" düğmeleri ve davet sayfası App Store'a bağlanır.
+APP_ID = '6824196874'
+YAYINDA = False
+APP_STORE_URL = f'https://apps.apple.com/tr/app/campusfits/id{APP_ID}' if YAYINDA else ''
+# Safari'nin kendi "Aç / Al" bandı. Uygulama mağazada yokken Safari bandı hiç göstermez, şimdiden durabilir.
+APP_BANNER = f'<meta name="apple-itunes-app" content="app-id={APP_ID}">\n'
+
+
+def replace_n(s, old, new, count):
+    assert s.count(old) == count, f'sablonda beklenen {count} yerine {s.count(old)} eşleşme: {old[:60]}'
+    return s.replace(old, new)
+
+
 # ───── Ana sayfa ─────
 index = read('sablon.html')
 uni = json.load(open(f'{ROOT}/universiteler.json', encoding='utf-8'))
 names = [u for u in uni if 'Üniversite' in u]
 index = index.replace('{{UNIS}}', ''.join(f'<span>{esc(n)}</span>' for n in names))
 index = index.replace('{{UNI_COUNT}}', str(len(uni)))
-index = index.replace('<meta charset="utf-8">\n', '<meta charset="utf-8">\n' + SECURITY_META, 1)
+index = index.replace('<meta charset="utf-8">\n', '<meta charset="utf-8">\n' + SECURITY_META + APP_BANNER, 1)
+if YAYINDA:
+    index = replace_n(index, '<a class="pill" href="#indir">Yakında</a>', f'<a class="pill" href="{APP_STORE_URL}">İndir</a>', 1)
+    index = replace_n(index,
+                         '<a class="store" href="#indir" aria-label="App Store\'da yakında"><svg aria-hidden="true"><use href="#apple"/></svg><span><small>Yakında</small><b>App Store</b></span></a>',
+                         f'<a class="store" href="{APP_STORE_URL}" aria-label="App Store\'dan indir"><svg aria-hidden="true"><use href="#apple"/></svg><span><small>İndir</small><b>App Store</b></span></a>',
+                         2)
 index = index.replace('<nav aria-label="Alt bağlantılar"><a href="gizlilik.html">Gizlilik</a><a href="kosullar.html">Kullanım koşulları</a><a href="destek.html">Destek</a></nav>',
                       f'<nav aria-label="Alt bağlantılar">{FOOTER_LINKS}</nav>')
 write('index.html', index)
@@ -154,7 +174,6 @@ page('destek.html', 'Destek', 'CampusFits destek, iletişim ve hesap silme.', de
 # doğrudan uygulamada açar (universal link, .well-known/apple-app-site-association); değilse bu sayfa görünür.
 # Sitedeki tek betik bu: linkteki parametreyi doğrulayıp "uygulamada aç" bağlantısına ve başlığa yazar. CSP sadece
 # bu betiğin özetine (sha256) izin verir. Metin textContent ile yazılır; HTML olarak yorumlanmaz.
-APP_STORE_URL = ''  # App Store Connect'te uygulama açılınca: https://apps.apple.com/tr/app/campusfits/id<ID>
 DAVET_JS = ("(function(){var q=new URLSearchParams(location.search),p=q.get('plan')||'',k=q.get('kisi')||'',s=[];"
             "if(/^[0-9a-z-]{1,64}$/i.test(p))s.push('plan='+encodeURIComponent(p));else p='';"
             "if(/^[a-z0-9._]{1,40}$/i.test(k))s.push('kisi='+encodeURIComponent(k));else k='';"
@@ -166,6 +185,7 @@ DAVET_JS = ("(function(){var q=new URLSearchParams(location.search),p=q.get('pla
 _h = base64.b64encode(hashlib.sha256(DAVET_JS.encode()).digest()).decode()
 DAVET_META = (f'<meta http-equiv="Content-Security-Policy" content="{CSP.replace(chr(39) + "none" + chr(39), chr(39) + "sha256-" + _h + chr(39), 1)}">\n'
               '<meta name="referrer" content="strict-origin-when-cross-origin">\n'
+              + APP_BANNER +
               '<meta property="og:type" content="website">\n'
               '<meta property="og:site_name" content="CampusFits">\n'
               '<meta property="og:title" content="Kampüsüne davetlisin · CampusFits">\n'
